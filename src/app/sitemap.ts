@@ -13,6 +13,9 @@ const STATIC: { path: string; changeFrequency: MetadataRoute.Sitemap[number]["ch
   { path: "/magistrate", changeFrequency: "hourly", priority: 0.8 },
   { path: "/motel", changeFrequency: "hourly", priority: 0.7 },
   { path: "/about", changeFrequency: "monthly", priority: 0.7 },
+  { path: "/security", changeFrequency: "monthly", priority: 0.6 },
+  { path: "/privacy", changeFrequency: "yearly", priority: 0.4 },
+  { path: "/terms", changeFrequency: "yearly", priority: 0.4 },
   { path: "/llms.txt", changeFrequency: "weekly", priority: 0.5 },
 ];
 

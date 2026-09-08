@@ -27,6 +27,9 @@ const COLUMNS: { title: string; links: { href: string; label: string }[] }[] = [
       { href: "/docs", label: "API reference" },
       { href: "/api/openapi.json", label: "OpenAPI schema" },
       { href: "/llms.txt", label: "llms.txt" },
+      { href: "/security", label: "Security" },
+      { href: "/privacy", label: "Privacy" },
+      { href: "/terms", label: "Terms" },
     ],
   },
 ];
