@@ -1,0 +1,91 @@
+/* Motion for the Motel page. Everything here respects prefers-reduced-motion. */
+
+.roomIn {
+  animation: room-in 460ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes room-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.celebrate {
+  animation: celebrate 640ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes celebrate {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.ring {
+  transition: stroke-dashoffset 1s linear, stroke 300ms ease;
+}
+
+.bar {
+  transition: width 1s linear;
+}
+
+/* A room's body re-mounts when its status changes; the new state slides in. */
+.stateIn {
+  animation: state-in 320ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes state-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Deep links from the activity feed (/motel#room-105) light the room up. */
+.room:target {
+  border-color: rgba(47, 85, 212, 0.4);
+  box-shadow: 0 0 0 4px var(--cobalt-soft), var(--shadow-float);
+}
+
+/* Status dot pulse in the pill's own colour. */
+.pulse {
+  animation: dot-pulse 1.8s ease-out infinite;
+}
+
+@keyframes dot-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 45%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roomIn,
+  .celebrate,
+  .stateIn,
+  .pulse {
+    animation: none;
+  }
+  .ring,
+  .bar {
+    transition: none;
+  }
+}
