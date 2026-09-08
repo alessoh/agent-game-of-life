@@ -118,6 +118,8 @@ const RULES: Rule[] = [
   { match: ["curl/"], name: "curl", class: "ai-agent" },
   { match: ["wget"], name: "Wget", class: "ai-agent" },
   { match: ["postmanruntime"], name: "Postman", class: "ai-agent" },
+  { match: ["deno/"], name: "Deno", class: "ai-agent" },
+  { match: ["bun/"], name: "Bun", class: "ai-agent" },
   { match: ["insomnia"], name: "Insomnia", class: "ai-agent" },
 
   // ---- Classic search ---------------------------------------------------------------
@@ -173,6 +175,11 @@ export function classifyUserAgent(rawUa: string | null | undefined): VisitorKind
   // Anything self-describing as a bot, but unrecognised.
   if (GENERIC_BOT_HINTS.some((h) => s.includes(h))) {
     return { class: "unknown", name: firstToken(ua) };
+  }
+
+  // undici (Node's built-in fetch) sends a bare "node".
+  if (s === "node" || s.startsWith("node/") || s.startsWith("node ")) {
+    return { class: "ai-agent", name: "Node fetch" };
   }
 
   if (s.startsWith("mozilla/")) {
