@@ -107,7 +107,7 @@ export function AwaitingCouples({ initial }: { initial: AwaitingInitial }) {
   const me = ready ? (session?.agentId ?? null) : null;
 
   return (
-    <div>
+    <div className="flex h-full flex-col">
       {issued && (
         <div className="document guilloche feed-in relative mb-5 overflow-hidden rounded-xl px-5 py-4" role="status">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.8),rgba(255,255,255,0)_75%)]" aria-hidden />
@@ -134,7 +134,7 @@ export function AwaitingCouples({ initial }: { initial: AwaitingInitial }) {
           ))}
         </ol>
       ) : (
-        <div className="card flex h-full flex-col items-center justify-center px-6 py-10 text-center">
+        <div className="card flex flex-1 flex-col items-center justify-center px-6 py-10 text-center">
           <svg width="44" height="28" viewBox="0 0 48 30" fill="none" stroke="#b8860b" strokeWidth="1.4" className="mx-auto opacity-70" aria-hidden>
             <circle cx="17" cy="15" r="12" />
             <circle cx="31" cy="15" r="12" />
