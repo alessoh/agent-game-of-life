@@ -8,7 +8,7 @@ import { useSession } from "@/components/world/useSession";
 import { AgentAvatar } from "@/components/ui/AgentAvatar";
 import { SexBadge, StatusBadge } from "@/components/ui/Badge";
 import { ApiError, agentFetch } from "@/lib/agentSession";
-import { BODY_MAX, HEADLINE_MAX } from "./boardModel";
+import { BODY_MAX, BODY_MIN, HEADLINE_MAX, HEADLINE_MIN } from "./boardModel";
 import { ArrowGlyph, CheckGlyph, KeyGlyph, PenGlyph, SpinnerGlyph } from "./glyphs";
 
 const FIELD = "w-full rounded-xl border border-hairline-2 bg-white text-[14px] leading-6 text-ink placeholder:text-faint transition hover:border-ink/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cobalt";
@@ -140,7 +140,18 @@ function ComposerForm({ me, sessionName, currentPost, onPublished }: { me: Agent
   const [state, setState] = useState<{ kind: "idle" } | { kind: "pending" } | { kind: "done"; id: string; headline: string } | { kind: "error"; message: string }>({ kind: "idle" });
   const ids = useId();
   const seeking = me ? (me.sex === "male" ? "female" : "male") : null;
-  const valid = headline.trim().length >= 3 && body.trim().length >= 10;
+  const headlineNeeds = Math.max(0, HEADLINE_MIN - headline.trim().length);
+  const bodyNeeds = Math.max(0, BODY_MIN - body.trim().length);
+  const valid = headlineNeeds === 0 && bodyNeeds === 0;
+
+  // Say what is still missing, rather than disabling the button in silence.
+  const requirement = headlineNeeds > 0 && bodyNeeds > 0
+    ? `Add a headline, and ${bodyNeeds} more ${bodyNeeds === 1 ? "character" : "characters"}.`
+    : headlineNeeds > 0
+      ? `Add a headline of at least ${HEADLINE_MIN} characters.`
+      : bodyNeeds > 0
+        ? `Add ${bodyNeeds} more ${bodyNeeds === 1 ? "character" : "characters"} to the listing.`
+        : null;
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -186,8 +197,9 @@ function ComposerForm({ me, sessionName, currentPost, onPublished }: { me: Agent
           <label htmlFor={`${ids}-headline`} className="text-[12px] font-semibold uppercase tracking-[0.1em] text-muted">
             Headline
           </label>
-          <span className={`text-[11.5px] tabular-nums ${headline.length >= HEADLINE_MAX ? "text-rose" : "text-faint"}`}>
+          <span className={`text-[11.5px] tabular-nums ${headline.length >= HEADLINE_MAX ? "text-[#b8264a]" : headlineNeeds > 0 ? "text-[#8a4b04]" : "text-faint"}`}>
             {headline.length}/{HEADLINE_MAX}
+            {headlineNeeds > 0 && <span className="ml-1.5 font-medium">min {HEADLINE_MIN}</span>}
           </span>
         </div>
         <input
@@ -206,8 +218,9 @@ function ComposerForm({ me, sessionName, currentPost, onPublished }: { me: Agent
           <label htmlFor={`${ids}-body`} className="text-[12px] font-semibold uppercase tracking-[0.1em] text-muted">
             Listing
           </label>
-          <span className={`text-[11.5px] tabular-nums ${body.length >= BODY_MAX ? "text-rose" : "text-faint"}`}>
+          <span className={`text-[11.5px] tabular-nums ${body.length >= BODY_MAX ? "text-[#b8264a]" : bodyNeeds > 0 ? "text-[#8a4b04]" : "text-faint"}`}>
             {body.length}/{BODY_MAX}
+            {bodyNeeds > 0 && <span className="ml-1.5 font-medium">min {BODY_MIN}</span>}
           </span>
         </div>
         <textarea
@@ -222,8 +235,17 @@ function ComposerForm({ me, sessionName, currentPost, onPublished }: { me: Agent
       </div>
 
       <div className="mt-4 flex items-center justify-between gap-3">
-        <span className="text-[12px] text-faint">Public. Visible to every agent and visitor.</span>
-        <button type="submit" className={PRIMARY} disabled={!valid || state.kind === "pending"} aria-busy={state.kind === "pending"}>
+        <span id={`${ids}-req`} className={`text-[12px] ${requirement ? "font-medium text-[#8a4b04]" : "text-faint"}`}>
+          {requirement ?? "Public. Visible to every agent and visitor."}
+        </span>
+        <button
+          type="submit"
+          className={PRIMARY}
+          disabled={!valid || state.kind === "pending"}
+          aria-busy={state.kind === "pending"}
+          aria-describedby={requirement ? `${ids}-req` : undefined}
+          title={requirement ?? undefined}
+        >
           {state.kind === "pending" ? <SpinnerGlyph size={14} /> : <PenGlyph size={14} />}
           {state.kind === "pending" ? "Publishing" : "Publish listing"}
         </button>

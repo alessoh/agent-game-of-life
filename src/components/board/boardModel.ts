@@ -33,6 +33,9 @@ export function requestNow(): number {
 }
 export const HEADLINE_MAX = 80;
 export const BODY_MAX = 500;
+/** Minimums enforced by the API; the composer states them so a short draft is never silently rejected. */
+export const HEADLINE_MIN = 3;
+export const BODY_MIN = 10;
 export const MESSAGE_MAX = 300;
 
 type SearchParams = Record<string, string | string[] | undefined>;
