@@ -204,6 +204,10 @@ export async function recordVisit(input: VisitInput, kind: VisitorKind, acted: b
       VALUES (${input.visitor}, ${kind.class}, ${kind.name}, ${kind.operator ?? null}, ${input.ua.slice(0, 400)}, ${input.country},
               ${input.at}, ${input.at}, 1, ${acted}, ${JSON.stringify([step])}::jsonb)
       ON CONFLICT (visitor) DO UPDATE SET
+        -- Re-apply the current classification so improvements to the rules take effect.
+        class = ${kind.class},
+        name = ${kind.name},
+        operator = ${kind.operator ?? null},
         last_seen = ${input.at},
         hits = agol_visitors.hits + 1,
         acted = agol_visitors.acted OR ${acted},
