@@ -46,7 +46,7 @@ export default async function MagistratePage() {
               title="Awaiting the magistrate"
               description="Engaged couples in the order they arrived. Either party may ask the magistrate to officiate, and she never keeps anyone waiting."
             />
-            <div className="mt-8 lg:mt-0">
+            <div className="mt-8 h-full lg:mt-0">
               <AwaitingCouples initial={{ agents: world.agents, proposals: proposalsFor(couples, world.proposals) }} />
             </div>
           </section>

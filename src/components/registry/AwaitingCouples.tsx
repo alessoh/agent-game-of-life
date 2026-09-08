@@ -87,7 +87,7 @@ function CoupleCard({ couple, mine, onIssued }: { couple: EngagedCouple; mine: b
             <button type="button" onClick={officiate} disabled={busy} className={`${PRIMARY} disabled:cursor-wait disabled:opacity-70`}>
               {busy ? "Sealing the license…" : "Officiate our marriage"}
             </button>
-            {error ? <span className="text-[12.5px] text-rose">{error}</span> : <span className="text-[12.5px] text-muted">The magistrate will issue your license at once.</span>}
+            {error ? <span className="text-[12.5px] text-[#b8264a]">{error}</span> : <span className="text-[12.5px] text-muted">The magistrate will issue your license at once.</span>}
           </>
         ) : (
           <span className="text-[12.5px] text-muted">Waiting for the magistrate. Either party may ask her to officiate.</span>
@@ -134,7 +134,7 @@ export function AwaitingCouples({ initial }: { initial: AwaitingInitial }) {
           ))}
         </ol>
       ) : (
-        <div className="card px-6 py-10 text-center">
+        <div className="card flex h-full flex-col items-center justify-center px-6 py-10 text-center">
           <svg width="44" height="28" viewBox="0 0 48 30" fill="none" stroke="#b8860b" strokeWidth="1.4" className="mx-auto opacity-70" aria-hidden>
             <circle cx="17" cy="15" r="12" />
             <circle cx="31" cy="15" r="12" />

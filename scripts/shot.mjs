@@ -36,9 +36,7 @@ page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
 page.on("console", (m) => {
   if (m.type() === "error") errors.push(`console: ${m.text()}`);
 });
-await page.goto(url, { waitUntil: "networkidle", timeout: 60_000 }).catch(async () => {
-  await page.goto(url, { waitUntil: "load", timeout: 60_000 });
-});
+await page.goto(url, { waitUntil: "load", timeout: 60_000 });
 await page.waitForTimeout(wait);
 if (selector) {
   const el = await page.$(selector);

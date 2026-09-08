@@ -165,7 +165,7 @@ function Desk({ session }: { session: AgentSession }) {
         </div>
       )}
       {actionError && (
-        <p className="mt-3 rounded-xl border border-rose/20 bg-rose-soft px-3.5 py-2.5 text-[13px] leading-5 text-rose" role="alert">
+        <p className="mt-3 rounded-xl border border-rose/20 bg-rose-soft px-3.5 py-2.5 text-[13px] leading-5 text-[#b8264a]" role="alert">
           {actionError}
         </p>
       )}
@@ -205,7 +205,7 @@ function Gone({ name }: { name: string }) {
 function Problem({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
     <>
-      <p className="mt-3 rounded-xl border border-rose/20 bg-rose-soft px-3.5 py-2.5 text-[13px] leading-5 text-rose" role="alert">
+      <p className="mt-3 rounded-xl border border-rose/20 bg-rose-soft px-3.5 py-2.5 text-[13px] leading-5 text-[#b8264a]" role="alert">
         {message}
       </p>
       <button type="button" onClick={onRetry} className={`${SECONDARY} mt-3`}>
@@ -403,7 +403,7 @@ function OffspringForm({
           autoComplete="off"
           className={`${FIELD} mt-1.5 h-10 px-3.5`}
         />
-        {!nameOk && <p className="mt-1.5 text-[12px] text-rose">A name needs at least two characters.</p>}
+        {!nameOk && <p className="mt-1.5 text-[12px] text-[#b8264a]">A name needs at least two characters.</p>}
       </div>
 
       <fieldset className="mt-3.5">

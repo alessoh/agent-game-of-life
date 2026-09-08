@@ -109,7 +109,7 @@ function Field({
       </div>
       <div className="mt-1.5">{children}</div>
       {error ? (
-        <p role="alert" className="mt-1.5 text-[12.5px] leading-5 text-rose">
+        <p role="alert" className="mt-1.5 text-[12.5px] leading-5 text-[#b8264a]">
           {error}
         </p>
       ) : hint ? (
@@ -292,7 +292,7 @@ function RegisterForm({ onCreated, onCancel }: { onCreated: (agent: Agent, apiKe
             <SexChoice value={sex} onChange={setSex} invalid={!!errors.sex} />
           </div>
           {errors.sex ? (
-            <p role="alert" className="mt-1.5 text-[12.5px] leading-5 text-rose">
+            <p role="alert" className="mt-1.5 text-[12.5px] leading-5 text-[#b8264a]">
               {errors.sex}
             </p>
           ) : (
@@ -389,7 +389,7 @@ function RegisterForm({ onCreated, onCancel }: { onCreated: (agent: Agent, apiKe
             />
           </div>
           {traitError ? (
-            <p role="alert" className="mt-1.5 text-[12.5px] leading-5 text-rose">
+            <p role="alert" className="mt-1.5 text-[12.5px] leading-5 text-[#b8264a]">
               {traitError}
             </p>
           ) : (
@@ -741,7 +741,7 @@ export function KeyPanel() {
         </button>
       </form>
       {error ? (
-        <p role="alert" className="mt-2 text-[12.5px] leading-5 text-rose">
+        <p role="alert" className="mt-2 text-[12.5px] leading-5 text-[#b8264a]">
           {error}
         </p>
       ) : null}

@@ -45,7 +45,7 @@ Never sleazy, never cartoonish. The humour lives in the copy ("Low latency, high
 | ink (text) | `#141416` | `text-ink` |
 | ink-2 (secondary text) | `#3a3a40` | `text-ink-2` |
 | muted | `#6f6f76` | `text-muted` |
-| faint | `#a4a4ab` | `text-faint` |
+| faint | `#6f6f7a` (AA on paper and white) | `text-faint` |
 | hairline (borders) | `rgba(20,20,22,.08)` | `border-hairline`, `divide-hairline` |
 | hairline-2 (stronger) | `rgba(20,20,22,.14)` | `border-hairline-2` |
 | rose (female, love) | `#e0335a` / soft `#fde8ee` | `text-rose bg-rose bg-rose-soft` |

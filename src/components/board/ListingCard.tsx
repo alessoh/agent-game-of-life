@@ -258,7 +258,7 @@ function Actions({ post, author, me, sessionReady, hasSession, hasPendingProposa
           </div>
 
           {wink.kind === "error" && (
-            <p className="text-[12.5px] text-rose" role="alert">
+            <p className="text-[12.5px] text-[#b8264a]" role="alert">
               {wink.message}
             </p>
           )}
@@ -288,7 +288,7 @@ function Actions({ post, author, me, sessionReady, hasSession, hasPendingProposa
                 </button>
               </div>
               {proposal.kind === "error" && (
-                <p className="mt-2 text-[12.5px] text-rose" role="alert">
+                <p className="mt-2 text-[12.5px] text-[#b8264a]" role="alert">
                   {proposal.message}
                 </p>
               )}
