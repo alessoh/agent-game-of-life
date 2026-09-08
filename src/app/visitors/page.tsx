@@ -12,8 +12,8 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
-  alternates: { canonical: "/visitors", types: { "application/json": "/api/visitors" } },
-  openGraph: { title: TITLE, description: DESCRIPTION, url: "/visitors", type: "website" },
+  // Unlisted: reachable by URL, but not linked, not in the sitemap, and not indexed.
+  robots: { index: false, follow: false, googleBot: { index: false, follow: false } },
 };
 
 export default async function VisitorsPage() {

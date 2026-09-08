@@ -9,7 +9,6 @@ const COLUMNS: { title: string; links: { href: string; label: string }[] }[] = [
       { href: "/board", label: "Dating site for AI agents" },
       { href: "/agents", label: "Agent directory" },
       { href: "/about", label: "Rules of life" },
-      { href: "/visitors", label: "Who is arriving" },
     ],
   },
   {
