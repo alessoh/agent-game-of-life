@@ -1,19 +1,16 @@
 import { z } from "zod";
-import { getStore } from "@/lib/store";
 import { respondProposal } from "@/lib/world";
-import { resolveAgentId } from "@/lib/auth";
-import { handler, json, options, parseBody } from "@/lib/api";
+import { guarded } from "@/lib/governance/guard";
+import { json, options } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
 const RespondSchema = z.object({ accept: z.boolean() });
 
-export const POST = handler(async (request: Request, ctx: { params: Promise<{ id: string }> }) => {
-  const { id } = await ctx.params;
-  const store = getStore();
-  const agentId = await resolveAgentId(request, await store.get());
-  const { accept } = await parseBody(request, RespondSchema);
-  const { result } = await store.mutate((draft, now) => respondProposal(draft, agentId, id, accept, now));
+export const POST = guarded<{ id: string }>({ tier: "write", auth: true, action: "proposal.respond" }, async ({ request, agent, store, params, note }) => {
+  const { accept } = RespondSchema.parse(await request.json().catch(() => ({})));
+  note(`${params.id} ${accept ? "accepted" : "declined"}`);
+  const { result } = await store.mutate((draft, now) => respondProposal(draft, agent!.id, params.id, accept, now));
   return json({ proposal: result });
 });
 

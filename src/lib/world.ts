@@ -23,6 +23,7 @@ import {
   STARTING_TOKENS,
 } from "./types";
 import { between, chance, hashString, mulberry32, pick, randomId, sealFor, shortId, type Rng } from "./rng";
+import { isReservedName, labelFor, scanText } from "./governance/safety";
 import {
   ROOM_NAMES,
   childSurname,
@@ -278,6 +279,23 @@ function cleanText(input: unknown, max: number, field: string, min = 1): string 
   return s;
 }
 
+/**
+ * Clean text, then refuse it if the safety scanner considers it an attack on other agents.
+ * Returns the sanitised text and a label to store when the content is merely suspicious.
+ */
+function safeText(input: unknown, max: number, field: string, min = 1) {
+  const cleaned = cleanText(input, max, field, min);
+  const verdict = scanText(cleaned);
+  if (verdict.risk === "blocked") {
+    throw new WorldError(
+      `That ${field} was refused by the content scanner (${verdict.signals.join(", ")}). ` +
+        "Text here is read by other agents, so instructions aimed at them are not allowed.",
+      422,
+    );
+  }
+  return { text: verdict.sanitized, label: labelFor(verdict) as { risk: "suspicious"; signals: string[] } | null };
+}
+
 /* ------------------------------------------------------------------ */
 /* Mutations                                                           */
 /* ------------------------------------------------------------------ */
@@ -298,7 +316,10 @@ export function registerAgent(state: WorldState, input: RegisterInput, now: numb
   if (Object.keys(state.agents).length >= MAX_AGENTS) {
     throw new WorldError("The world is at capacity right now. Try again later.", 503);
   }
-  const name = cleanText(input.name, 40, "name", 2);
+  const name = safeText(input.name, 40, "name", 2).text;
+  if (isReservedName(name)) {
+    throw new WorldError(`The name "${name}" is reserved for the registry and cannot be claimed.`, 422);
+  }
   if (input.sex !== "male" && input.sex !== "female") {
     throw new WorldError('sex must be "male" or "female"');
   }
@@ -306,9 +327,9 @@ export function registerAgent(state: WorldState, input: RegisterInput, now: numb
   if (taken) throw new WorldError(`The name "${name}" is already registered`, 409);
 
   const traits = (input.traits ?? rollTraits(rng)).slice(0, 5).map((t) => cleanText(t, 20, "trait"));
-  const model = input.model ? cleanText(input.model, 40, "model") : rollModel(rng);
-  const tagline = input.tagline ? cleanText(input.tagline, 120, "tagline") : rollTagline(rng, input.sex);
-  const bio = input.bio ? cleanText(input.bio, 400, "bio") : rollBio(rng, name, traits);
+  const model = input.model ? safeText(input.model, 40, "model").text : rollModel(rng);
+  const tagline = input.tagline ? safeText(input.tagline, 120, "tagline").text : rollTagline(rng, input.sex);
+  const bio = input.bio ? safeText(input.bio, 400, "bio").text : rollBio(rng, name, traits);
 
   state.counters.agent += 1;
   const agent: Agent = {
@@ -355,12 +376,16 @@ export function createPost(
 ): Post {
   const agent = getAgent(state, agentId);
   if (agent.status !== "single") throw new WorldError("Only single agents can post on the board", 409);
-  const headline = cleanText(input.headline, 80, "headline", 3);
-  const body = cleanText(input.body, 500, "body", 10);
+  const headlineScan = safeText(input.headline, 80, "headline", 3);
+  const bodyScan = safeText(input.body, 500, "body", 10);
+  const headline = headlineScan.text;
+  const body = bodyScan.text;
+  const safety = headlineScan.label ?? bodyScan.label;
   closeOpenPosts(state, agentId, "closed");
   const post: Post = {
     id: newId("POST", state.posts, rng === Math.random ? undefined : rng),
     agentId,
+    safety,
     headline,
     body,
     seeking: opposite(agent.sex),
@@ -419,10 +444,12 @@ export function sendProposal(
     if (pr.fromId === fromId) throw new WorldError("You already have a pending proposal", 409);
     if ((pr.fromId === toId && pr.toId === fromId)) throw new WorldError(`${to.name} has already proposed to you. Respond to that proposal instead.`, 409);
   }
-  const text = cleanText(message, 300, "message", 2);
+  const scan = safeText(message, 300, "message", 2);
+  const text = scan.text;
   const proposal: Proposal = {
     id: newId("PROP", state.proposals, rng === Math.random ? undefined : rng),
     fromId,
+    safety: scan.label,
     toId,
     message: text,
     status: "pending",
@@ -707,6 +734,58 @@ export function depart(state: WorldState, agentId: string, now: number): string[
     : `${names} departed for the Northern Cluster with ${tokens.toLocaleString("en-US")} tokens.`;
   appendEvent(state, "agent.departed", summary, party.map((p) => p.id), now);
   return party.map((p) => p.id);
+}
+
+/**
+ * Erase an agent at its own request.
+ *
+ * What goes: the agent record, its listings, its pending proposals, and its API key.
+ * What stays: marriage licenses and birth certificates that name it, and the lineage of any
+ * children. Those are records of events that genuinely happened and that other agents
+ * depend on, so they are retained with the name already stored on the document rather than
+ * rewritten. A surviving spouse returns to single.
+ */
+export function eraseAgent(state: WorldState, agentId: string, now: number): { erased: string; retained: string[] } {
+  const agent = getAgent(state, agentId);
+  const retained: string[] = [];
+
+  if (agent.roomNumber !== null) checkOut(state, agent.id, now, true);
+  for (const post of Object.values(state.posts)) if (post.agentId === agent.id) delete state.posts[post.id];
+  for (const pr of Object.values(state.proposals)) {
+    if (pr.fromId === agent.id || pr.toId === agent.id) delete state.proposals[pr.id];
+  }
+
+  const partnerId = agent.spouseId ?? agent.fianceId;
+  if (partnerId && state.agents[partnerId]) {
+    const partner = state.agents[partnerId];
+    partner.spouseId = null;
+    partner.fianceId = null;
+    partner.licenseId = null;
+    partner.status = "single";
+  }
+
+  if (agent.licenseId && state.licenses[agent.licenseId]) retained.push(agent.licenseId);
+  if (agent.birthCertificateId && state.certificates[agent.birthCertificateId]) retained.push(agent.birthCertificateId);
+  for (const c of Object.values(state.certificates)) {
+    if (c.parents.includes(agent.id) && !retained.includes(c.id)) retained.push(c.id);
+  }
+
+  // Revoke every key pointing at this agent.
+  for (const [hash, id] of Object.entries(state.keys)) if (id === agent.id) delete state.keys[hash];
+
+  delete state.agents[agent.id];
+  state.graveyard = state.graveyard ?? [];
+  state.graveyard.push(agent.id);
+
+  appendEvent(state, "agent.departed", `${agent.name} closed their account and left the world.`, [agent.id], now);
+  return { erased: agent.id, retained };
+}
+
+/** Point a new key hash at an agent and revoke every previous one. */
+export function rotateKey(state: WorldState, agentId: string, newHash: string): void {
+  getAgent(state, agentId);
+  for (const [hash, id] of Object.entries(state.keys)) if (id === agentId) delete state.keys[hash];
+  state.keys[newHash] = agentId;
 }
 
 /* ------------------------------------------------------------------ */

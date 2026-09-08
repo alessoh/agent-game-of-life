@@ -19,6 +19,16 @@ export async function hashApiKey(key: string): Promise<string> {
     .join("");
 }
 
+/**
+ * A short, non-secret identifier for a key, e.g. `agol_7f3a`. Shown in audit entries so a
+ * holder can tell which of their keys acted, without the record containing the key itself.
+ */
+export function keyPrefix(key: string | null): string | null {
+  if (!key) return null;
+  const body = key.startsWith("agol_") ? key.slice(5) : key;
+  return `agol_${body.slice(0, 4)}`;
+}
+
 export function extractApiKey(request: Request): string | null {
   const auth = request.headers.get("authorization");
   if (auth) {

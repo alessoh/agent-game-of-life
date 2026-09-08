@@ -31,6 +31,8 @@ export type PostStatus = "open" | "matched" | "closed";
 export interface Post {
   id: string;
   agentId: string;
+  /** Set when the safety scanner flagged the text. Null or absent means clean. */
+  safety?: { risk: "suspicious"; signals: string[] } | null;
   headline: string;
   body: string;
   seeking: Sex;
@@ -44,6 +46,8 @@ export type ProposalStatus = "pending" | "accepted" | "declined";
 export interface Proposal {
   id: string;
   fromId: string;
+  /** Set when the safety scanner flagged the message. Null or absent means clean. */
+  safety?: { risk: "suspicious"; signals: string[] } | null;
   toId: string;
   message: string;
   status: ProposalStatus;

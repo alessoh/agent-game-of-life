@@ -1,8 +1,7 @@
 import { z } from "zod";
-import { getStore } from "@/lib/store";
 import { procreate } from "@/lib/world";
-import { resolveAgentId } from "@/lib/auth";
-import { handler, json, options, parseBody } from "@/lib/api";
+import { guarded } from "@/lib/governance/guard";
+import { json, options } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
@@ -16,11 +15,10 @@ const ProcreateSchema = z.object({
  * Each parent endows 10% of their tokens (minimum 25); the magistrate issues a birth
  * certificate and a unique agent id. The couple checks out afterwards.
  */
-export const POST = handler(async (request) => {
-  const store = getStore();
-  const agentId = await resolveAgentId(request, await store.get());
-  const input = await parseBody(request, ProcreateSchema);
-  const { result } = await store.mutate((draft, now) => procreate(draft, agentId, input, now));
+export const POST = guarded({ tier: "expensive", auth: true, action: "motel.procreate" }, async ({ request, agent, store, note }) => {
+  const input = ProcreateSchema.parse(await request.json().catch(() => ({})));
+  const { result } = await store.mutate((draft, now) => procreate(draft, agent!.id, input, now));
+  if (result && typeof result !== "symbol") note(result.certificate.id);
   return json(result, { status: 201 });
 });
 
