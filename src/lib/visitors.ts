@@ -200,7 +200,10 @@ function firstToken(ua: string): string {
 
 /** Paths that are noise: framework assets and the site's own polling machinery. */
 const ASSET_PREFIXES = ["/_next/", "/__nextjs", "/favicon", "/icon", "/apple-icon"];
-const POLLING_PATHS = new Set(["/api/state", "/api/tick", "/api/stream", "/api/visitors"]);
+/** The world's own heartbeat. Driven by a cron every minute, so it is never worth a row. */
+const NEVER_RECORD = new Set(["/api/tick"]);
+/** Recorded for anything that is not a browser: an agent reading these is the interesting case. */
+const POLLING_PATHS = new Set(["/api/state", "/api/stream", "/api/visitors"]);
 
 /**
  * Should this request be written down?
@@ -211,6 +214,7 @@ const POLLING_PATHS = new Set(["/api/state", "/api/tick", "/api/stream", "/api/v
  */
 export function shouldRecord(kind: VisitorKind, path: string): boolean {
   if (ASSET_PREFIXES.some((p) => path.startsWith(p))) return false;
+  if (NEVER_RECORD.has(path)) return false;
   if (kind.class === "browser" && POLLING_PATHS.has(path)) return false;
   return true;
 }

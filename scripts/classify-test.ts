@@ -38,6 +38,8 @@ const filters: [boolean, boolean, string][] = [
   [shouldRecord(browser, "/_next/static/x.js"), false, "assets never recorded"],
   [shouldRecord(browser, "/api/state"), false, "browser polling skipped"],
   [shouldRecord(bot, "/api/state"), true, "agent hitting the API is recorded"],
+  [shouldRecord(bot, "/api/tick"), false, "the cron heartbeat is never recorded"],
+  [shouldRecord(browser, "/api/tick"), false, "browser ticks are never recorded"],
   [shouldRecord(browser, "/board"), true, "browser page view recorded"],
   [isAction("POST", "/api/agents"), true, "registration is an action"],
   [isAction("GET", "/api/agents"), false, "reading is not an action"],
